@@ -5,6 +5,10 @@ import createHashHistory from 'history/createHashHistory'
 import { MainContainer, HomeContainer, AuthenticateContainer, FeedContainer } from 'containers'
 import { Navigation } from 'components'
 import { connect } from 'react-redux'
+import { createStore, applyMiddleware } from 'redux'
+import users from 'redux/modules/users'
+import thunk from 'redux-thunk'
+
 import { checkIfAuthed } from 'helpers/auth'
 
 // export function getRoutes (checkAuth) {
@@ -12,6 +16,9 @@ import { checkIfAuthed } from 'helpers/auth'
 // }
 
 const history = createHashHistory();
+
+const store = createStore(users, applyMiddleware(thunk));
+console.log(store.getState());
 
 // const NavBar = React.createClass({
 //   render() {
@@ -46,22 +53,44 @@ const history = createHashHistory();
 // }
 
 //export default function getRoutes (checkAuth){
-// class TestApp extends React.Component {
+ class TestApp extends React.Component {
 //
 // }
-const TestApp = React.createClass({
+//const TestApp = React.createClass({
   render () {
+     const { from } =  '/home'
+    // const { redirectToReferrer } = this.state
+    //
+    //
+    // if (redirectToReferrer) {
+    //      return (
+    //        <Redirect to={from}/>
+    //      )
+    //    }
+
     console.log(this.props.isAuthed);
     function checkAuth (nextState, replace) {
-      const isAuthed = checkIfAuthed(this.props)
-      const nextPathName = nextState.location.pathname
-      if (nextPathName === '/' || nextPathName === '/auth') {
+      const isAuthed = checkIfAuthed(store)
+      console.log(isAuthed);
+    //  const nextPathName = nextState.location.pathname
+      // if (nextPathName === '/' || nextPathName === '/auth') {
         if (isAuthed === true) {
           replace('/feed')
+        //  console.log();
+          //history.push('feed')
         }
-      } else {
+      else {
         if (isAuthed !== true) {
-          replace('/auth')
+          console.log("not authed");
+          //replace('/auth')
+        history.push('auth')
+      //this.setState({ redirectToReferrer: true })
+      // return (
+      //   <Redirect to={from}/>
+      // )
+
+        //console.log("not authed");
+
         }
       }
     }
@@ -72,20 +101,35 @@ const TestApp = React.createClass({
             <div>
               <Navigation isAuthed={this.props.isAuthed}/>
                 <Switch>
-                  <Route exact path='/' component={MainContainer} onEnter={checkAuth}/>
-                  <Route exact path='/auth' component={AuthenticateContainer} onEnter={checkAuth}/>
-                  <Route exact path='/feed' component={FeedContainer}  onEnter={checkAuth}/>
-                  <Route exact path='/home' component={HomeContainer} onEnter={checkAuth} />
+                  <Route exact path='/' component={MainContainer} onEnter={checkAuth()}/>
+                  <Route exact path='/auth' component={AuthenticateContainer} onEnter={checkAuth()}/>
+                  <Route exact path='/feed' component={FeedContainer}  onEnter={checkAuth()}/>
+                  <Route exact path='/home' component={HomeContainer} onEnter={checkAuth()} />
                 </Switch>
             </div>
           </Router>
     )
-  },
-})
+  }
+}
 
-export default connect(
-  (state) => ({isAuthed: state.isAuthed})
-)(TestApp)
+function mapStateToProps (state) {
+  console.log(state);
+  return {
+    isFetching: state.isFetching,
+    error: state.error,
+    isAuthed: state.isAuthed,
+  }
+}
+// function mapDispatchToProps (dispatch) {
+//   return bindActionCreators(userActionCreators, dispatch)
+// }
+
+export default connect(mapStateToProps)(TestApp)
+
+
+// export default connect(
+//   (state) => ({isAuthed: state.isAuthed})
+// )(TestApp)
 
 // const TestApp = () => (
 //     <Router history={createHashHistory()}>

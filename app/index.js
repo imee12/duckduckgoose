@@ -5,6 +5,7 @@ import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
 import users from 'redux/modules/users'
 import thunk from 'redux-thunk'
+import {checkIfAuthed} from 'helpers/auth'
 
 const store = createStore(users, applyMiddleware(thunk));
 console.log(store.getState());
@@ -33,7 +34,7 @@ function checkAuth (nextState, replace) {
 
 ReactDOM.render(
   <Provider store={store}>
-    <TestApp checkAuth={checkAuth}/>
+    <TestApp />
   </Provider>,
    document.getElementById('app')
 )
